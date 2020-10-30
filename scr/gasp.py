@@ -1,10 +1,12 @@
 import discord
 import random
 import requests
+import youtube_dl
+
 from discord.ext import commands
 
 
-
+players = {}
 
 #User Comparision
 def user_is_me(ctx):
@@ -20,14 +22,14 @@ class Bot(commands.Cog):
 	    r = requests.get('https://source.unsplash.com/collection/1775931')
 	    await ctx.send(r.url)
 
-	@commands.command(name='coolness_level')
-	async def coolness_level(self, ctx):
+	@commands.command(name='amicool')
+	async def amicool(self, ctx):
 		if user_is_me(ctx):
-			await ctx.send()
+			await ctx.send(file = discord.File("res/wavy_bro.jpg"))
 			await ctx.send('ngl, your fucking wavy bro')
 		else:
 			if random.randint(1,10) == 2:
-				await ctx.send('hello',file = discord.file('/mnt/c/Users/vinyc/Dropbox/Discord Bot/res/wavy bro.jpeg'))
+				await ctx.send(file = discord.File('/res/wavy bro.jpeg'))
 				await ctx.send('ngl, your fucking wavy bro')
 			else:
 				await ctx.send('https://media1.tenor.com/images/59926e8ff8929e782a58fc142769518c/tenor.gif?itemid=15200688')
@@ -40,13 +42,22 @@ class Bot(commands.Cog):
 	@commands.command()
 	async def clip(self, ctx, clip:str=''):
 		channel = ctx.author.voice.channel
-		await channel.connect()
-		channel.play(source("../res/clips/{0}.mp4".format(clip)))
+		channel = await channel.connect()
+		channel.play(source("/res/clips/{0}.mp3".format(clip)))
 		await ctx.voice_client.disconnect()
-		return
 
 	@commands.command()
-	#@commands.has_permissions(administrator=True)
+	async def play(self, ctx, url):
+		channel = ctx.author.voice.channel
+		channel = await channel.connect()
+		guild = ctx.message.guild
+		voice_client = guild.voice_client
+		player = await voice_client.create_ffmpeg_player('res/clips/alex_sus.mp3')
+		players[server.id] = player
+		player.start()
+
+
+	@commands.command()
 	async def shaddup(self, ctx, member: discord.Member):
 		if user_is_me(ctx) or ctx.author.guild_permissions.administrator:
 			await member.edit(mute=True)
