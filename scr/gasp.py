@@ -41,22 +41,7 @@ class Bot(commands.Cog):
 	async def clip(self, ctx, clip:str=''):
 		channel = ctx.author.voice.channel
 		await channel.connect()
-		await ctx.voice_client.disconnect()
-		await channel.connect()
-		await ctx.voice_client.disconnect()
-		await channel.connect()
-		await ctx.voice_client.disconnect()
-		await channel.connect()
-		await ctx.voice_client.disconnect()
-		await channel.connect()
-		await ctx.voice_client.disconnect()
-		await channel.connect()
-		await ctx.voice_client.disconnect()
-		await channel.connect()
-		await ctx.voice_client.disconnect()
-		await channel.connect()
-		await ctx.voice_client.disconnect()
-		await channel.connect()
+		channel.play(source("../res/clips/{0}.mp4".format(clip)))
 		await ctx.voice_client.disconnect()
 		return
 
