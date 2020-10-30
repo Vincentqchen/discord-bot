@@ -5,6 +5,7 @@ from discord.ext import commands
 
 
 
+
 #User Comparision
 def user_is_me(ctx):
     return ctx.author.id == 172475977450913792
