@@ -77,16 +77,16 @@ class Bot(commands.Cog):
 
 
 	@commands.command()
-	async def clip(self, ctx, phrase):
+	async def clip(self, ctx, *args):
 		#If the author isn't 
 		if ctx.author.voice != None:
-			if os.path.isfile('res/clips/{}.mp3'.format(phrase)):
+			if os.path.isfile('res/clips/{}.mp3'.format(args[0])):
 				voice_channel=ctx.author.voice.channel
 				channel = ctx.author.voice.channel
 				channel = await channel.connect()
 				guild = ctx.guild
 				voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=guild)
-				audio_source = discord.FFmpegPCMAudio('res/clips/{}.mp3'.format(phrase))
+				audio_source = discord.FFmpegPCMAudio('res/clips/{}.mp3'.format(args[0]))
 				if not voice_client.is_playing():
 					voice_client.play(audio_source, after=None)
 				while voice_client.is_playing():
