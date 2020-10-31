@@ -137,7 +137,7 @@ class Bot(commands.Cog):
 
 	@commands.command()
 	async def swearat(self, ctx, name:str='', num_times:str=''):
-	    all_words = open("/mnt/c/Users/vinyc/Dropbox/Discord Bot/res/swearwords.txt").readlines()
+	    all_words = open("res/swearwords.txt").readlines()
 	    selected_words = all_words[random.randrange(165)][:-1]
 	    
 	    # see if "twice" or "thrice" is written in the command
