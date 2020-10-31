@@ -48,6 +48,9 @@ def load_opus_lib(opus_libs=OPUS_LIBS):
 def user_is_me(ctx):
     return ctx.author.id == 172475977450913792
 
+def user_is_quad(ctx):
+	return ctx.author.id == 114081086065213443 or ctx.author.id == 259321897517449217 or ctx.author.id == 403355889253220352 or ctx.author.id == 172475977450913792
+
 class Bot(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
@@ -58,6 +61,10 @@ class Bot(commands.Cog):
 	    r = requests.get('https://source.unsplash.com/collection/1775931')
 	    await ctx.send(r.url)
 
+	@commands.command()
+	async def invite(self, ctx):
+		await ctx.author.send('https://discord.com/api/oauth2/authorize?client_id=770766611929366551&permissions=0&scope=bot')
+		
 	@commands.command(name='amicool')
 	async def amicool(self, ctx):
 		if user_is_me(ctx):
@@ -78,24 +85,34 @@ class Bot(commands.Cog):
 
 	@commands.command()
 	async def clip(self, ctx, *args):
-		#If the author isn't 
-		if ctx.author.voice != None:
-			if os.path.isfile('res/clips/{}.mp3'.format(args[0])):
-				voice_channel=ctx.author.voice.channel
-				channel = ctx.author.voice.channel
-				channel = await channel.connect()
-				guild = ctx.guild
-				voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=guild)
-				audio_source = discord.FFmpegPCMAudio('res/clips/{}.mp3'.format(args[0]))
-				if not voice_client.is_playing():
-					voice_client.play(audio_source, after=None)
-				while voice_client.is_playing():
-					await asyncio.sleep(1)
-				await voice_client.disconnect()
+		if user_is_quad(ctx):
+			if len(args) == 0:
+				embed=discord.Embed(title="will play a sus clip.", description="Usage: gasp clip {clip-name}", color=0x1100ff)
+				embed.set_thumbnail(url="https://media.giphy.com/media/dgK22exekwOLm/giphy.gif")
+				embed.set_author(name="Clip Command Usage")
+				embed.add_field(name="List of avaliable clips:", value="bitch chris \n i just farted \n alex_sus \n nishant wack \n nishant_is_gay\n huuhhhh nishant ", inline=True)
+				await ctx.send(embed=embed)
 			else:
-				await ctx.send("This clip doesn't exist doopid")
+				#If the author isn't 
+				if ctx.author.voice != None:
+					if os.path.isfile('res/clips/{}.mp3'.format(args[0])):
+						voice_channel=ctx.author.voice.channel
+						channel = ctx.author.voice.channel
+						channel = await channel.connect()
+						guild = ctx.guild
+						voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=guild)
+						audio_source = discord.FFmpegPCMAudio('res/clips/{}.mp3'.format(args[0]))
+						if not voice_client.is_playing():
+							voice_client.play(audio_source, after=None)
+						while voice_client.is_playing():
+							await asyncio.sleep(1)
+						await voice_client.disconnect()
+					else:
+						await ctx.send("This clip doesn't exist doopid")
+				else:
+					await ctx.send("Small brain headass... not even in a vc")
 		else:
-			await ctx.send("Small brain headass... not even in a vc")
+			await ctx.send("Not a quad member, sorry :(")
 	@commands.command()
 	async def shaddup(self, ctx, member: discord.Member):
 		if user_is_me(ctx) or ctx.author.guild_permissions.administrator:
