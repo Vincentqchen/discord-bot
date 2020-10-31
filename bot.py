@@ -16,4 +16,4 @@ functions = ['scr.events','scr.gasp']
 if __name__ == '__main__':
     for function in functions:
         bot.load_extension(function)
-    bot.run(NzcwNzY2NjExOTI5MzY2NTUx.X5iWWA.SlWwN5qbna-0NxGcupooip5e2m8)
+    bot.run('NzcwNzY2NjExOTI5MzY2NTUx.X5iWWA.SlWwN5qbna-0NxGcupooip5e2m8')
