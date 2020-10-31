@@ -1,12 +1,47 @@
 import discord
 import random
 import requests
-import youtube_dl
+import youtube_dl 
+from async_timeout import timeout
+import asyncio
 
 from discord.ext import commands
-
+import opuslib
 
 players = {}
+
+YTDL_OPTIONS = {
+        'format': 'bestaudio/best',
+        'extractaudio': True,
+        'audioformat': 'mp3',
+        'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
+        'restrictfilenames': True,
+        'noplaylist': True,
+        'nocheckcertificate': True,
+        'ignoreerrors': False,
+        'logtostderr': False,
+        'quiet': True,
+        'no_warnings': True,
+        'default_search': 'auto',
+        'source_address': '0.0.0.0',
+    }
+
+OPUS_LIBS = ['libopus-0.x86.dll', 'libopus-0.x64.dll', 'libopus-0.dll', 'libopus.so.0', 'libopus.0.dylib']
+
+ytdl = youtube_dl.YoutubeDL(YTDL_OPTIONS)
+
+def load_opus_lib(opus_libs=OPUS_LIBS):
+    if opus.is_loaded():
+        return True
+
+    for opus_lib in opus_libs:
+        try:
+            opus.load_opus(opus_lib)
+            return
+        except OSError:
+            pass
+
+        raise RuntimeError('Could not load an opus lib. Tried %s' % (', '.join(opus_libs)))
 
 #User Comparision
 def user_is_me(ctx):
@@ -29,7 +64,7 @@ class Bot(commands.Cog):
 			await ctx.send('ngl, your fucking wavy bro')
 		else:
 			if random.randint(1,10) == 2:
-				await ctx.send(file = discord.File('/res/wavy bro.jpeg'))
+				await ctx.send(file = discord.File('res/wavy bro.jpeg'))
 				await ctx.send('ngl, your fucking wavy bro')
 			else:
 				await ctx.send('https://media1.tenor.com/images/59926e8ff8929e782a58fc142769518c/tenor.gif?itemid=15200688')
@@ -39,24 +74,24 @@ class Bot(commands.Cog):
 	async def say(self, ctx, phrase:str=''):
 		return
 
-	@commands.command()
-	async def clip(self, ctx, clip:str=''):
-		channel = ctx.author.voice.channel
-		channel = await channel.connect()
-		channel.play(source("/res/clips/{0}.mp3".format(clip)))
-		await ctx.voice_client.disconnect()
 
 	@commands.command()
-	async def play(self, ctx, url):
-		channel = ctx.author.voice.channel
-		channel = await channel.connect()
-		guild = ctx.message.guild
-		voice_client = guild.voice_client
-		player = await voice_client.create_ffmpeg_player('res/clips/alex_sus.mp3')
-		players[server.id] = player
-		player.start()
+	async def clip(self, ctx, phrase):
+		voice_channel=ctx.author.voice.channel
+		if voice_channel!= None:
+			channel = ctx.author.voice.channel
+			channel = await channel.connect()
+			guild = ctx.guild
+			voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=guild)
 
-
+			audio_source = discord.FFmpegPCMAudio('res/clips/{}.mp3'.format(phrase))
+			if not voice_client.is_playing():
+				voice_client.play(audio_source, after=None)
+			while voice_client.is_playing():
+				await asyncio.sleep(1)
+			await voice_client.disconnect()
+		else:
+			await ctx.send("Small brain headass... not even in a vc")
 	@commands.command()
 	async def shaddup(self, ctx, member: discord.Member):
 		if user_is_me(ctx) or ctx.author.guild_permissions.administrator:
