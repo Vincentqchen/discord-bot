@@ -2,7 +2,7 @@ git+https://github.com/Rapptz/discord.py
 PyNaCl==1.3.0
 dnspython==1.16.0
 requests
-dotenv
+python-dotenv
 youtube-dl
 discord.py[voice] ~= 1.4.0
 pip
