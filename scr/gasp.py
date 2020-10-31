@@ -63,8 +63,9 @@ class Bot(commands.Cog):
 
 	@commands.command()
 	async def invite(self, ctx):
+		await ctx.author.send("Your mistake...")
 		await ctx.author.send('https://discord.com/api/oauth2/authorize?client_id=770766611929366551&permissions=0&scope=bot')
-		
+
 	@commands.command(name='amicool')
 	async def amicool(self, ctx):
 		if user_is_me(ctx):
