@@ -9,27 +9,51 @@ import asyncio
 from discord.ext import commands
 import opuslib
 
-players = {}
-
-YTDL_OPTIONS = {
-        'format': 'bestaudio/best',
-        'extractaudio': True,
-        'audioformat': 'mp3',
-        'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
-        'restrictfilenames': True,
-        'noplaylist': True,
-        'nocheckcertificate': True,
-        'ignoreerrors': False,
-        'logtostderr': False,
-        'quiet': True,
-        'no_warnings': True,
-        'default_search': 'auto',
-        'source_address': '0.0.0.0',
-    }
-
 OPUS_LIBS = ['libopus-0.x86.dll', 'libopus-0.x64.dll', 'libopus-0.dll', 'libopus.so.0', 'libopus.0.dylib']
 
-ytdl = youtube_dl.YoutubeDL(YTDL_OPTIONS)
+youtube_dl.utils.bug_reports_message = lambda: ''
+
+
+ytdl_format_options = {
+    'format': 'bestaudio/best',
+    'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
+    'restrictfilenames': True,
+    'noplaylist': True,
+    'nocheckcertificate': True,
+    'ignoreerrors': False,
+    'logtostderr': False,
+    'quiet': True,
+    'no_warnings': True,
+    'default_search': 'auto',
+    'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
+}
+
+ffmpeg_options = {
+    'options': '-vn'
+}
+
+ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
+
+class YTDLSource(discord.PCMVolumeTransformer):
+    def __init__(self, source, *, data, volume=0.5):
+        super().__init__(source, volume)
+
+        self.data = data
+
+        self.title = data.get('title')
+        self.url = data.get('url')
+
+    @classmethod
+    async def from_url(cls, url, *, loop=None, stream=False):
+        loop = loop or asyncio.get_event_loop()
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+
+        if 'entries' in data:
+            # take first item from a playlist
+            data = data['entries'][0]
+
+        filename = data['url'] if stream else ytdl.prepare_filename(data)
+        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 def load_opus_lib(opus_libs=OPUS_LIBS):
     if opus.is_loaded():
@@ -55,6 +79,26 @@ class Bot(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 
+	@commands.command()
+	async def summon(self, ctx):
+		channel = ctx.author.voice.channel
+		channel = await channel.connect()
+
+	@commands.command()
+	async def stop(self, ctx):
+		server = ctx.message.guild.voice_client
+		await server.disconnect()
+
+	@commands.command(pass_context=True)
+	async def play(self, ctx, *, url):
+		channel = ctx.author.voice.channel
+		channel = await channel.connect()
+		async with ctx.typing():
+			voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+			player = await YTDLSource.from_url(url, loop=self.bot.loop)
+			voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+		await ctx.send('Now playing: {}'.format(player.title))
+
 	#Bot Commands
 	@commands.command(name='cry')
 	async def cry(self, ctx):
@@ -73,7 +117,7 @@ class Bot(commands.Cog):
 			await ctx.send('ngl, your fucking wavy bro')
 		else:
 			if random.randint(1,10) == 2:
-				await ctx.send(file = discord.File('res/wavy bro.jpeg'))
+				await ctx.send(file = discord.File('res/wavy_bro.jpg'))
 				await ctx.send('ngl, your fucking wavy bro')
 			else:
 				await ctx.send('https://media1.tenor.com/images/59926e8ff8929e782a58fc142769518c/tenor.gif?itemid=15200688')
@@ -97,7 +141,6 @@ class Bot(commands.Cog):
 				#If the author isn't 
 				if ctx.author.voice != None:
 					if os.path.isfile('res/clips/{}.mp3'.format(args[0])):
-						voice_channel=ctx.author.voice.channel
 						channel = ctx.author.voice.channel
 						channel = await channel.connect()
 						guild = ctx.guild
@@ -132,7 +175,6 @@ class Bot(commands.Cog):
 		else:
 			embed=discord.Embed(title="Permission Denied.", description="You don't have permission to use this command.", color=0xff00f6)
 			await ctx.send(embed=embed)
-
 
 
 	@commands.command()
