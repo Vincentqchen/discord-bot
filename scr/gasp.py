@@ -4,6 +4,7 @@ import requests
 import os.path
 import youtube_dl 
 from async_timeout import timeout
+from scr.events import response
 import asyncio
 
 from discord.ext import commands
@@ -127,6 +128,24 @@ class Bot(commands.Cog):
 	async def say(self, ctx, phrase:str=''):
 		return
 
+	@commands.command()
+	async def noticemesenpai(self, ctx, member: discord.Member, *args):
+		name = ctx.author.mention
+		if len(args) == 0:
+			for num in range(50):
+				await member.send("{} wants ur attention :)".format(name))
+				await member.send("Tell me to \'stop\' and I'll stop <3")
+				await asyncio.sleep(5)
+				if response == True:
+					print('f')
+					break
+		elif int(args[0]) > 10:
+			await ctx.send("Can't be spamming them so much")
+		else:
+			for num in range(int(args[0])):
+				await member.send("{} wants ur attention :)".format(name))
+				await asyncio.sleep(5)
+
 
 	@commands.command()
 	async def clip(self, ctx, *args):
@@ -143,7 +162,7 @@ class Bot(commands.Cog):
 					if os.path.isfile('res/clips/{}.mp3'.format(args[0])):
 						channel = ctx.author.voice.channel
 						channel = await channel.connect()
-						guild = ctx.guild
+						guild = ctx.guild 
 						voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=guild)
 						audio_source = discord.FFmpegPCMAudio('res/clips/{}.mp3'.format(args[0]))
 						if not voice_client.is_playing():

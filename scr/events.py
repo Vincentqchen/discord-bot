@@ -3,6 +3,7 @@ import asyncio
 from discord.ext import commands
 import itertools 
 
+response = False
 
 async def change_status(bot, data):
     await bot.wait_until_ready()
@@ -32,8 +33,11 @@ class Events(commands.Cog):
 	    if message.author == self.bot.user:
 	        return
 
-	    if message.content.startswith('$hello'):
-	        await message.channel.send('Hello!')
+	    if message.guild is None and message.content == "stop":
+	        response = True
+
+
+
 
 	    # if message.author.id == 114081086065213443:
 	    # 	await message.channel.send('GAY BITCH')
