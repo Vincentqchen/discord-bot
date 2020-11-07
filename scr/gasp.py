@@ -144,6 +144,8 @@ class Bot(commands.Cog):
 		else:
 			for num in range(int(args[0])):
 				await member.send("{} wants ur attention :)".format(name))
+				if len(args) > 1:
+					await member.send("They want you to know: \"{}\"".format(args[1]))
 				await asyncio.sleep(5)
 
 
@@ -154,7 +156,7 @@ class Bot(commands.Cog):
 				embed=discord.Embed(title="will play a sus clip.", description="Usage: gasp clip {clip-name}", color=0x1100ff)
 				embed.set_thumbnail(url="https://media.giphy.com/media/dgK22exekwOLm/giphy.gif")
 				embed.set_author(name="Clip Command Usage")
-				embed.add_field(name="List of avaliable clips:", value="bitch chris \n i just farted \n alex_sus \n nishant wack \n nishant_is_gay\n huuhhhh nishant ", inline=True)
+				embed.add_field(name="List of avaliable clips:", value="bitch chris \n i just farted \n alex_sus \n nishant wack \n nishant_is_gay\n huuhhhh nishant\n gay_for_me\n nishidoesthedeed\n babynish", inline=True)
 				await ctx.send(embed=embed)
 			else:
 				#If the author isn't 

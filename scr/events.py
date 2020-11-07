@@ -26,17 +26,19 @@ class Events(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_member_join(member):
-  		await member.send(f"lmao, {member} has joined this doo doo server")
+  		await self.bot.send(f"lmao, {member} has joined this doo doo server")
 
 	@commands.Cog.listener()
 	async def on_message(self, message):
 	    if message.author == self.bot.user:
 	        return
 
+
 	    if message.guild is None and message.content == "stop":
 	        response = True
 
-
+	    if "bruh" in message.content.lower():
+	    	await message.channel.send("bruh moment")
 
 
 	    # if message.author.id == 114081086065213443:
