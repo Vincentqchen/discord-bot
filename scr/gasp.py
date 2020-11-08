@@ -126,7 +126,8 @@ class Bot(commands.Cog):
 	
 	@commands.command()
 	async def poll(self, ctx, phrase:str=''):
-
+		return
+		
 	@commands.command()
 	async def say(self, ctx, phrase:str=''):
 		return
