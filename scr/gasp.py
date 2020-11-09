@@ -160,7 +160,7 @@ class Bot(commands.Cog):
 				embed=discord.Embed(title="will play a sus clip.", description="Usage: gasp clip {clip-name}", color=0x1100ff)
 				embed.set_thumbnail(url="https://media.giphy.com/media/dgK22exekwOLm/giphy.gif")
 				embed.set_author(name="Clip Command Usage")
-				embed.add_field(name="List of avaliable clips:", value="bitch chris \n i just farted \n alex_sus \n nishant wack \n nishant_is_gay\n huuhhhh nishant\n gay_for_me\n nishidoesthedeed\n babynish\n suschris", inline=True)
+				embed.add_field(name="List of avaliable clips:", value="bitch chris \n i just farted \n alex_sus \n nishant wack \n nishant_is_gay\n huuhhhh nishant\n gay_for_me\n nishidoesthedeed\n babynish\n suschris\n beepboopbop\n deathtochris", inline=True)
 				await ctx.send(embed=embed)
 			else:
 				#If the author isn't 
