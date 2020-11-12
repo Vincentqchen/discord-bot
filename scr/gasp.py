@@ -111,6 +111,21 @@ class Bot(commands.Cog):
 		await ctx.author.send("Your mistake...")
 		await ctx.author.send('https://discord.com/api/oauth2/authorize?client_id=770766611929366551&permissions=0&scope=bot')
 
+	@commands.command()
+	async def focs(self, ctx, num:int):
+		L = [1,2,3,4,5,6,7,8,9,10]
+		results = 0
+		for n in range(num):
+			random.shuffle(L)
+			count = 0
+			for i in range(10):
+				count += 1
+				if L[i] == 5:
+					break
+			results += count
+		results = results/num
+		await ctx.send('Average number of keys before finding the correct one is '+str(results))
+
 	@commands.command(name='amicool')
 	async def amicool(self, ctx):
 		if user_is_me(ctx):
@@ -133,23 +148,24 @@ class Bot(commands.Cog):
 		return
 
 	@commands.command()
+	@commands.cooldown(1, 30, commands.BucketType.user)
 	async def noticemesenpai(self, ctx, member: discord.Member, *args):
-		name = ctx.author.mention
-		if len(args) == 0:
-			for num in range(50):
-				await member.send("{} wants ur attention :)".format(name))
-				await member.send("Tell me to \'stop\' and I'll stop <3")
-				await asyncio.sleep(5)
-				if response == True:
-					print('f')
-					break
-		elif int(args[0]) > 10:
+
+		name = ctx.author.display_name
+		if int(args[0]) > 10:
 			await ctx.send("Can't be spamming them so much")
 		else:
+			invitelink = await ctx.channel.create_invite(max_uses=1,unique=True)
+			await member.send(invitelink)
 			for num in range(int(args[0])):
-				await member.send("{} wants ur attention :)".format(name))
+
+
+				embed=discord.Embed(title="{} wants your attention ;) ".format(name), description="He/She's chillin in the server above", color=0x1ad194)
 				if len(args) > 1:
-					await member.send("They want you to know: \"{}\"".format(args[1]))
+					embed.add_field(name="They want you to know:", value=args[1], inline=False)
+				embed.set_footer(text="Requested by {}".format(name))
+				await member.send(embed=embed)
+				
 				await asyncio.sleep(5)
 
 
@@ -160,7 +176,7 @@ class Bot(commands.Cog):
 				embed=discord.Embed(title="will play a sus clip.", description="Usage: gasp clip {clip-name}", color=0x1100ff)
 				embed.set_thumbnail(url="https://media.giphy.com/media/dgK22exekwOLm/giphy.gif")
 				embed.set_author(name="Clip Command Usage")
-				embed.add_field(name="List of avaliable clips:", value="bitch chris \n i just farted \n alex_sus \n nishant wack \n nishant_is_gay\n huuhhhh nishant\n gay_for_me\n nishidoesthedeed\n babynish\n suschris\n beepboopbop\n deathtochris", inline=True)
+				embed.add_field(name="List of avaliable clips:", value="bitch chris \n i just farted \n alex_sus \n nishant wack \n nishant_is_gay\n slurpslurpalex\n huuhhhh nishant\n gay_for_me\n nishidoesthedeed\n babynish\n suschris\n beepboopbop\n deathtochris", inline=True)
 				await ctx.send(embed=embed)
 			else:
 				#If the author isn't 
@@ -177,9 +193,9 @@ class Bot(commands.Cog):
 							await asyncio.sleep(1)
 						await voice_client.disconnect()
 					else:
-						await ctx.send("This clip doesn't exist doopid")
+						await ctx.send("This clip doesn't exist")
 				else:
-					await ctx.send("Small brain headass... not even in a vc")
+					await ctx.send("Must be in a VC to use this command")
 		else:
 			await ctx.send("Not a quad member, sorry :(")
 	@commands.command()
@@ -188,7 +204,7 @@ class Bot(commands.Cog):
 			await member.edit(mute=True)
 			await member.edit(deafen=True)
 			if member.id == 259321897517449217:
-				embed=discord.Embed(title="FUCK YOU CHRIS", description="Bitch Boi", color=0x1a285b)
+				embed=discord.Embed(title="Shhhhhhh chris", description=":(", color=0x1a285b)
 				embed.set_author(name="Created by: Vincent <3")
 				embed.set_thumbnail(url="https://media.giphy.com/media/I7p8K5EY9w9dC/giphy.gif")
 				await ctx.send(embed=embed)
