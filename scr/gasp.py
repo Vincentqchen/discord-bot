@@ -2,6 +2,7 @@ import discord
 import random
 import requests
 import os.path
+import json
 import youtube_dl 
 from async_timeout import timeout
 from scr.events import response
@@ -81,6 +82,95 @@ class Bot(commands.Cog):
 		self.bot = bot
 
 	@commands.command()
+	async def meme(self,ctx,*args):
+		response = requests.get("https://api.imgflip.com/get_memes")
+		memetemplates = ["","","","","",""]
+		memedic = {}  #{num: (id,boxcount)}
+
+
+		# post = {
+		#     "template_id": "",
+		#     "username": "boyuchen",
+		#     "password": "kfq9aWrP#KFtviR",
+		#     "boxes":[],
+		# }
+
+		post2 = {
+		    "template_id": "112126428",
+		    "username": "boyuchen",
+		    "password": "kfq9aWrP#KFtviR",
+		    "boxes[0][type]":"text",
+		    "boxes[1][type]":"text",
+		    "boxes[0][text]":"text1",
+		    "boxes[1][text]":"text1",
+		}
+
+		box = {
+		"text": "",
+		"x": 10,
+		"y": 10,
+		"width": 548,
+		"height": 100,
+		"color": "#ffffff",
+		"outline_color": "#000000"
+		}
+
+		if response.status_code == 200: # ok
+		    res = response.json()
+		    count = 0
+		    pointer = 0
+		    for num,temp in enumerate(res["data"]["memes"]):
+		        if count < len(res["data"]["memes"])//5:
+		            memetemplates[pointer] = memetemplates[pointer] + str(num)+":  "+temp["name"]+"\n"
+		            memedic[num] = (temp["id"],temp["box_count"])
+		            count += 1
+		        else:
+		            pointer += 1
+		            count = 0
+		                
+		else:
+		    print("network issue")
+
+
+		if len(args) == 0:    
+		    for i in range(len(memetemplates)):
+		        if len(memetemplates[i]) != 0:
+		            p = "```{0}```".format(memetemplates[i])
+		            await ctx.send(p,delete_after = 40)
+		            await ctx.author.send(p)
+
+		elif len(args) == 1:
+		    memeid = memedic[int(args[0])][0]
+		    post2["template_id"] = memeid
+
+
+		    text = ""
+		    for i in range(memedic[int(args[0])][1]):
+		        text += (" text"+str(i))
+		        post2[f"boxes[{i}][text]"] = f"text{i}"
+		        post2[f"boxes[{i}][type]"] = "text"
+		       
+
+		    postresponse = requests.request('POST', url='https://api.imgflip.com/caption_image',params=post2).json()
+		    image = postresponse["data"]["url"].replace("\\","")
+		    await ctx.send("boi meme {0}{1}".format(args[0],text))
+		    await ctx.send(image)
+
+		elif len(args) >= 3 and len(args) < 10:
+		    memeid = memedic[int(args[0])][0]
+		    post2["template_id"] = memeid
+		    for i in range(memedic[int(args[0])][1]):
+		        post2[f"boxes[{i}][text]"] = args[i+1]
+		        post2[f"boxes[{i}][type]"] = "text"
+		    postresponse = requests.request('POST', url='https://api.imgflip.com/caption_image',params=post2).json()
+		    image = postresponse["data"]["url"].replace("\\","")
+		    await ctx.send(image)
+		    
+		else:
+		    await ctx.send("ur kind of a meme")
+
+
+	@commands.command()
 	async def summon(self, ctx):
 		channel = ctx.author.voice.channel
 		channel = await channel.connect()
@@ -126,6 +216,7 @@ class Bot(commands.Cog):
 		results = results/num
 		await ctx.send('Average number of keys before finding the correct one is '+str(results))
 
+
 	@commands.command(name='amicool')
 	async def amicool(self, ctx):
 		if user_is_me(ctx):
@@ -140,9 +231,28 @@ class Bot(commands.Cog):
 				await ctx.send('Nah bro, you ain\'t it')
 	
 	@commands.command()
-	async def poll(self, ctx, phrase:str=''):
-		return
-		
+	async def poll(self, ctx, *args):
+		if len(args) == 0:
+			embed=discord.Embed(title="Poll Usage", description="Creates a poll using reactions as poll data", color=0xce1adb)
+			embed.set_thumbnail(url="https://media.giphy.com/media/KzPQHtlTajSTVPRcCz/giphy.gif")
+			embed.add_field(name="To create a poll", value="gasp poll \"{Poll Question}\" \"arg1\" \"arg2\" ... ", inline=True)
+			await ctx.send(embed=embed)
+		elif len(args) == 1:
+			embed=discord.Embed(title="Poll Usage", description="Creates a poll using reactions as poll data", color=0xce1adb)
+			embed.set_thumbnail(url="https://media.giphy.com/media/KzPQHtlTajSTVPRcCz/giphy.gif")
+			embed.add_field(name="To create a poll", value="gasp poll \"{Poll Question}\" \"arg1\" \"arg2\" ... ", inline=True)
+			await ctx.send(embed=embed)
+		else:
+			reactions = ['🇦','🇧','🇨','🇩','🇪','🇫','🇬','🇭','🇮']
+			#Create the embed with the first argument as the title
+			embed=discord.Embed(title=args[0], description="React to choose an answer",color=0x2b5df3)
+			for n in range(97,len(args)+96):
+				x = "regional_indicator_{0}".format(chr(n))
+				embed.add_field(name=":regional_indicator_{0}: - {1}".format(chr(n), args[n-96]), value="\u200b", inline=False)
+				
+			message = await ctx.send(embed=embed)
+			for num in range(len(args)-1):
+				await message.add_reaction(reactions[num])
 	@commands.command()
 	async def say(self, ctx, phrase:str=''):
 		return
@@ -155,10 +265,10 @@ class Bot(commands.Cog):
 		if int(args[0]) > 10:
 			await ctx.send("Can't be spamming them so much")
 		else:
+			await ctx.send("Attack sent succesfully")
 			invitelink = await ctx.channel.create_invite(max_uses=1,unique=True)
 			await member.send(invitelink)
 			for num in range(int(args[0])):
-
 
 				embed=discord.Embed(title="{} wants your attention ;) ".format(name), description="He/She's chillin in the server above", color=0x1ad194)
 				if len(args) > 1:
@@ -167,8 +277,6 @@ class Bot(commands.Cog):
 				await member.send(embed=embed)
 				
 				await asyncio.sleep(5)
-
-
 	@commands.command()
 	async def clip(self, ctx, *args):
 		if user_is_quad(ctx):
