@@ -216,6 +216,54 @@ class Bot(commands.Cog):
 		results = results/num
 		await ctx.send('Average number of keys before finding the correct one is '+str(results))
 
+	@commands.command()
+	async def focs1(self, ctx, num:int):
+		L = [0,0,1,0]
+		results = 0
+		for n in range(num):
+			count = 0
+			random.shuffle(L)
+			while L[0] != 1:
+				random.shuffle(L)
+				count += 1
+			results += count
+		results = results/num
+		await ctx.send('Average number of kids before finding the correct one is '+str(results))
+
+	@commands.command()
+	async def focs2(self, ctx, num:int):
+		L0 = [0,0]
+		L1 = [0,1]
+		L2 = [1,0]
+		L3 = [1,1]
+		L4 = [L0,L1,L2,L3]
+		oneofeach = False
+		result = 0
+		for n in range(num):
+			count = 1
+			while oneofeach != True:
+				L = []
+				random.shuffle(L4)
+				#If we get list 1 or 2, we have one of each
+				if L4[0] == L1 or L4[0] == L2:
+					count += 1
+					oneofeach = True
+				#otherwise continue
+				else:
+					#Append values into our list
+					for i in L4[0]:
+						L.append(i)
+					#if the count of 0 and 1 are greaster or equal to 1, we have one of each
+					if L.count(1) >= 1 and L.count(0) >= 1:
+						oneofeach = True
+						await ctx.send('help2'+count)
+					else:
+						count += 1
+						print(L)
+						#await ctx.send('help')
+			result += count
+		result = result/num
+		await ctx.send('Average number of packs before finding the correct one is '+str(result))
 
 	@commands.command(name='amicool')
 	async def amicool(self, ctx):
@@ -284,7 +332,7 @@ class Bot(commands.Cog):
 				embed=discord.Embed(title="will play a sus clip.", description="Usage: gasp clip {clip-name}", color=0x1100ff)
 				embed.set_thumbnail(url="https://media.giphy.com/media/dgK22exekwOLm/giphy.gif")
 				embed.set_author(name="Clip Command Usage")
-				embed.add_field(name="List of avaliable clips:", value="bitch chris \n i just farted \n alex_sus \n nishant wack \n nishant_is_gay\n slurpslurpalex\n huuhhhh nishant\n gay_for_me\n nishidoesthedeed\n babynish\n suschris\n beepboopbop\n deathtochris", inline=True)
+				embed.add_field(name="List of avaliable clips:", value="bitch chris \n i just farted \n alex_sus \n nishant wack \n nishant_is_gay\n slurpslurpalex\n huuhhhh nishant\n gay_for_me\n nishidoesthedeed\n babynish\n suschris\n beepboopbop\n deathtochris\n nishant likes asshole", inline=True)
 				await ctx.send(embed=embed)
 			else:
 				#If the author isn't 
