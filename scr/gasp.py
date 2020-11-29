@@ -2,7 +2,6 @@ import discord
 import random
 import requests
 import os.path
-import pyttsx3
 from gtts import gTTS
 import json
 import youtube_dl 
