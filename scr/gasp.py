@@ -169,7 +169,6 @@ class Bot(commands.Cog):
 		else:
 		    await ctx.send("ur kind of a meme")
 
-
 	@commands.command()
 	async def summon(self, ctx):
 		channel = ctx.author.voice.channel
@@ -190,7 +189,6 @@ class Bot(commands.Cog):
 			voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
 		await ctx.send('Now playing: {}'.format(player.title))
 
-	#Bot Commands
 	@commands.command(name='cry')
 	async def cry(self, ctx):
 	    r = requests.get('https://source.unsplash.com/collection/1775931')
@@ -229,41 +227,6 @@ class Bot(commands.Cog):
 			results += count
 		results = results/num
 		await ctx.send('Average number of kids before finding the correct one is '+str(results))
-
-	@commands.command()
-	async def focs2(self, ctx, num:int):
-		L0 = [0,0]
-		L1 = [0,1]
-		L2 = [1,0]
-		L3 = [1,1]
-		L4 = [L0,L1,L2,L3]
-		oneofeach = False
-		result = 0
-		for n in range(num):
-			count = 1
-			while oneofeach != True:
-				L = []
-				random.shuffle(L4)
-				#If we get list 1 or 2, we have one of each
-				if L4[0] == L1 or L4[0] == L2:
-					count += 1
-					oneofeach = True
-				#otherwise continue
-				else:
-					#Append values into our list
-					for i in L4[0]:
-						L.append(i)
-					#if the count of 0 and 1 are greaster or equal to 1, we have one of each
-					if L.count(1) >= 1 and L.count(0) >= 1:
-						oneofeach = True
-						await ctx.send('help2'+count)
-					else:
-						count += 1
-						print(L)
-						#await ctx.send('help')
-			result += count
-		result = result/num
-		await ctx.send('Average number of packs before finding the correct one is '+str(result))
 
 	@commands.command(name='amicool')
 	async def amicool(self, ctx):
@@ -313,7 +276,10 @@ class Bot(commands.Cog):
 			tts = gTTS(args[0], lang='en')
 		# If the user wants a random phrase played back to them
 		elif len(args) == 0:
-			pass
+			all_phrases = open("res/say/phrases.txt").readlines()
+			random.shuffle(all_phrases)
+			lang = ['en-au','en-uk','zh-CN','ja','es']
+			tts = gTTS(all_phrases[0], lang=random.choice(lang))
 
 		# If the user requests help
 		if len(args) == 1 and args[0] == 'help':
@@ -362,6 +328,7 @@ class Bot(commands.Cog):
 				await member.send(embed=embed)
 				
 				await asyncio.sleep(5)
+
 	@commands.command()
 	async def clip(self, ctx, *args):
 		if user_is_quad(ctx):
@@ -391,6 +358,7 @@ class Bot(commands.Cog):
 					await ctx.send("Must be in a VC to use this command")
 		else:
 			await ctx.send("Not a quad member, sorry :(")
+
 	@commands.command()
 	async def shaddup(self, ctx, member: discord.Member):
 		if user_is_me(ctx) or ctx.author.guild_permissions.administrator:
@@ -409,7 +377,6 @@ class Bot(commands.Cog):
 		else:
 			embed=discord.Embed(title="Permission Denied.", description="You don't have permission to use this command.", color=0xff00f6)
 			await ctx.send(embed=embed)
-
 
 	@commands.command()
 	async def swearat(self, ctx, name:str='', num_times:str=''):
