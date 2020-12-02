@@ -44,8 +44,6 @@ class Events(commands.Cog):
 				embed.add_field(name="Spam user with default message", value="gasp noticemesenpai \{name\} \{number of times\}", inline=False)
 				embed.add_field(name="Spam user with custom message", value="gasp noticemesenpai \{name\} \{number of times\} \"\{message\}\"", inline=False)
 				await ctx.send(embed=embed)
-
-
 		raise error  # re-raise the error so all the errors will still show up in console
 
 	@commands.Cog.listener()
@@ -59,9 +57,6 @@ class Events(commands.Cog):
 	    if "bruh" in message.content.lower():
 	    	await message.channel.send("bruh moment")
 
-
-	    # if message.author.id == 114081086065213443:
-	    # 	await message.channel.send('GAY BITCH')
 def setup(bot):
     bot.add_cog(Events(bot))
     print('Miscellaneous module loaded.')
