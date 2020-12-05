@@ -1,9 +1,11 @@
 import discord
 import asyncio
+from gtts import gTTS
 from discord.ext import commands
 import itertools 
 
-response = False
+#import scr.gasp
+ttsMode = False
 
 async def change_status(bot, data):
     await bot.wait_until_ready()
@@ -15,6 +17,8 @@ async def change_status(bot, data):
 
 class Events(commands.Cog):
 	def __init__(self, bot):
+		self.ttsMode = False
+		self.userId = 0
 		self.bot = bot
 
 
@@ -46,17 +50,62 @@ class Events(commands.Cog):
 				await ctx.send(embed=embed)
 		raise error  # re-raise the error so all the errors will still show up in console
 
+
 	@commands.Cog.listener()
 	async def on_message(self, message):
-	    if message.author == self.bot.user:
-	        return
+		ctx = await self.bot.get_context(message)
 
-	    if message.guild is None and message.content == "stop":
-	        response = True
+		if message.author == self.bot.user:
+			return
 
-	    if "bruh" in message.content.lower():
-	    	await message.channel.send("bruh moment")
+		if "bruh" in message.content.lower():
+			await message.channel.send("bruh moment")
+
+		if message.content == "gasp say tts":
+			self.userId = message.author.id
+			self.ttsMode = True
+			tts = gTTS("Starting TTS session", lang='en')
+			tts.save("res/say/saved_file.mp3")
+			if ctx.author.voice != None:
+				channel = ctx.author.voice.channel
+				channel = await channel.connect()
+				guild = ctx.guild 
+				voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=guild)
+				audio_source = discord.FFmpegPCMAudio('res/say/saved_file.mp3')
+				if not voice_client.is_playing():
+					voice_client.play(audio_source, after=None)
+				await ctx.send("Starting TTS Session\nType: \"Stop TTS\"")
+			else:
+				await ctx.send("Must be in a VC to use this command")
+		if message.content.lower() == "stop tts":
+			self.ttsMode = False
+			voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+			await voice_client.disconnect()
+			await ctx.send("Ending TTS Session")	
+
+
+		if self.ttsMode and message.author.id == self.userId and message.content != "gasp say tts":
+			tts = gTTS(message.content, lang='en')
+			tts.save("res/say/saved_file.mp3")
+			if ctx.author.voice != None:
+				guild = ctx.guild 
+				voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=guild)
+				audio_source = discord.FFmpegPCMAudio('res/say/saved_file.mp3')
+				if not voice_client.is_playing():
+					voice_client.play(audio_source, after=None)
+				else:
+					await ctx.send("Please wait till the bot has finished her sentence")
+			else:
+				await ctx.send("Must be in a VC to use this command")
+
+		
+
+
+
+
+
+			#await ctx.invoke(self.bot.get_command('say'), message.content)
 
 def setup(bot):
     bot.add_cog(Events(bot))
-    print('Miscellaneous module loaded.')
+    print('Events module loaded.')

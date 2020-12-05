@@ -14,6 +14,6 @@ bot = commands.Bot(command_prefix='gasp ')
 functions = ['scr.events','scr.gasp']
 
 if __name__ == '__main__':
-    for function in functions:
-        bot.load_extension(function)
-    bot.run(TOKEN)
+	for function in functions:
+		bot.load_extension(function)
+	bot.run(TOKEN)

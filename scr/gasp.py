@@ -6,7 +6,7 @@ from gtts import gTTS
 import json
 import youtube_dl 
 from async_timeout import timeout
-from scr.events import response
+import scr.config
 import asyncio
 
 from discord.ext import commands
@@ -289,6 +289,9 @@ class Bot(commands.Cog):
 			embed.add_field(name="Custom accent", value="gasp say \"text\" \{language\}", inline=False)
 			embed.add_field(name="Random joke/fun fact/phrase", value="gasp say", inline=False)
 			await ctx.send(embed=embed)
+		elif len(args) == 1 and args[0] == 'tts':
+			ttsMode = True
+			print(ttsMode)
 		else:
 			tts.save("res/say/saved_file.mp3")
 			if ctx.author.voice != None:
@@ -429,4 +432,4 @@ class Bot(commands.Cog):
 
 def setup(bot):
     bot.add_cog(Bot(bot))
-    print('Miscellaneous module loaded.')
+    print('Gasp module loaded.')

@@ -1,0 +1,2 @@
+#global ttsMode
+ttsMode = True
