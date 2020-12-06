@@ -266,6 +266,22 @@ class Bot(commands.Cog):
 				await message.add_reaction(reactions[num])
 
 	@commands.command()
+	async def scareme(self,ctx):
+		await ctx.message.delete()
+		timeFrame = random.randint(20, 600)
+		channel = ctx.author.voice.channel
+		channel = await channel.connect()
+		await asyncio.sleep(timeFrame)
+		guild = ctx.guild 
+		voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=guild)
+		audio_source = discord.FFmpegPCMAudio('res/scareme/scream1.mp3')
+		if not voice_client.is_playing():
+			voice_client.play(audio_source, after=None)
+		while voice_client.is_playing():
+			await asyncio.sleep(1)
+		await voice_client.disconnect()
+
+	@commands.command()
 	async def say(self, ctx, *args):
 
 		# If the user provides a language
@@ -339,7 +355,7 @@ class Bot(commands.Cog):
 				embed=discord.Embed(title="will play a sus clip.", description="Usage: gasp clip {clip-name}", color=0x1100ff)
 				embed.set_thumbnail(url="https://media.giphy.com/media/dgK22exekwOLm/giphy.gif")
 				embed.set_author(name="Clip Command Usage")
-				embed.add_field(name="List of avaliable clips:", value="bitch chris \n i just farted \n alex_sus \n nishant wack \n nishant_is_gay\n slurpslurpalex\n huuhhhh nishant\n gay_for_me\n nishidoesthedeed\n babynish\n suschris\n beepboopbop\n deathtochris\n nishant likes asshole", inline=True)
+				embed.add_field(name="List of avaliable clips:", value="bitch chris \n i just farted \n alex_sus \n nishant wack \n nishant_is_gay\n slurpslurpalex\n huuhhhh nishant\n gay_for_me\n nishidoesthedeed\n babynish\n suschris\n beepboopbop\n deathtochris\n nishant likes asshole\n chrisextrasus", inline=True)
 				await ctx.send(embed=embed)
 			else:
 				#If the author isn't 
