@@ -199,35 +199,6 @@ class Bot(commands.Cog):
 		await ctx.author.send("Your mistake...")
 		await ctx.author.send('https://discord.com/api/oauth2/authorize?client_id=770766611929366551&permissions=0&scope=bot')
 
-	@commands.command()
-	async def focs(self, ctx, num:int):
-		L = [1,2,3,4,5,6,7,8,9,10]
-		results = 0
-		for n in range(num):
-			random.shuffle(L)
-			count = 0
-			for i in range(10):
-				count += 1
-				if L[i] == 5:
-					break
-			results += count
-		results = results/num
-		await ctx.send('Average number of keys before finding the correct one is '+str(results))
-
-	@commands.command()
-	async def focs1(self, ctx, num:int):
-		L = [0,0,1,0]
-		results = 0
-		for n in range(num):
-			count = 0
-			random.shuffle(L)
-			while L[0] != 1:
-				random.shuffle(L)
-				count += 1
-			results += count
-		results = results/num
-		await ctx.send('Average number of kids before finding the correct one is '+str(results))
-
 	@commands.command(name='amicool')
 	async def amicool(self, ctx):
 		if user_is_me(ctx):
