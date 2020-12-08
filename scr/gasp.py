@@ -164,7 +164,7 @@ class Bot(commands.Cog):
 				masterExists = True
 				break
 		if masterExists:
-			if len(docDict) != 0 and args[0] in docDict:
+			if docDict != None and args[0] in docDict:
 				if (args[1] == 'disable'):
 					userDoc.set({args[0]:False}, merge = True)
 					embed=discord.Embed(title="Usage Command", description="You've disabled the {0} command for {1}".format(args[0], member.display_name), color=0xff0000)
