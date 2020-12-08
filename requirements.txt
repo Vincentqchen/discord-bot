@@ -10,3 +10,4 @@ youtube-dl
 discord.py[voice] ~= 1.4.0
 pip
 ffmpeg
+google-cloud-firestore

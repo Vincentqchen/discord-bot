@@ -1,11 +1,13 @@
 import discord
 import asyncio
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 from gtts import gTTS
 from discord.ext import commands
 import itertools 
 
-#import scr.gasp
-ttsMode = False
+db = firestore.client()
 
 async def change_status(bot, data):
     await bot.wait_until_ready()
@@ -19,6 +21,7 @@ class Events(commands.Cog):
 	def __init__(self, bot):
 		self.ttsMode = False
 		self.userId = 0
+		self.sayG = 0;
 		self.bot = bot
 
 
@@ -48,6 +51,12 @@ class Events(commands.Cog):
 				embed.add_field(name="Spam user with default message", value="gasp noticemesenpai \{name\} \{number of times\}", inline=False)
 				embed.add_field(name="Spam user with custom message", value="gasp noticemesenpai \{name\} \{number of times\} \"\{message\}\"", inline=False)
 				await ctx.send(embed=embed)
+			elif str(ctx.command) == "usage":
+				embed=discord.Embed(title="Usage Command", description="Prevent specific users from using commands", color=0x1553e5)
+				embed.add_field(name="Enable usage", value="gasp usage \{user\} \{ommand\} enable", inline=False)
+				embed.add_field(name="Disable usage", value="gasp usage \{user\} \{command\} disable", inline=False)
+				embed.set_footer(text="Requested by {0}".format(ctx.author.display_name))
+				await ctx.send(embed=embed)
 		raise error  # re-raise the error so all the errors will still show up in console
 
 
@@ -62,7 +71,18 @@ class Events(commands.Cog):
 			await message.channel.send("bruh moment")
 
 		if message.content == "gasp say tts":
+			userDoc = db.collection(u'users').document(str(message.author.id))
+			doc = userDoc.get()
+			if (doc.exists == False):
+				userDoc.set({u'meme':True, u'summon':True, u'stop':True, u'play':True, u'cry':True, u'invite':True, u'amicool':True, u'poll':True, u'scareme':True, u'say':True, u'noticemesenpai':True, u'clip':True, u'shaddup':True, u'swearat':True})
+			else:
+				doc = doc.to_dict()
+				if doc['say']:
+					pass
+				else:
+					return
 			self.userId = message.author.id
+			self.sayG = ctx.guild
 			self.ttsMode = True
 			tts = gTTS("Starting TTS session", lang='en')
 			tts.save("res/say/saved_file.mp3")
@@ -84,8 +104,15 @@ class Events(commands.Cog):
 			await ctx.send("Ending TTS Session")	
 
 
-		if self.ttsMode and message.author.id == self.userId and message.content != "gasp say tts":
-			tts = gTTS(message.content, lang='en')
+		if self.ttsMode and message.author.id == self.userId and message.content != "gasp say tts" and message.guild == self.sayG:
+			sayPhrase = message.content
+			sayPhrase.replace("nvm"," nevermind ")
+			sayPhrase.replace("gtg"," got to go ")
+			sayPhrase.replace(" ur "," your ")
+			sayPhrase.replace(" pp "," schlong a dong ")
+			sayPhrase.replace("chris","the bitch boy")
+			print("."+sayPhrase+".")
+			tts = gTTS(sayPhrase, lang='en')
 			tts.save("res/say/saved_file.mp3")
 			if ctx.author.voice != None:
 				guild = ctx.guild 

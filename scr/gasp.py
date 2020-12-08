@@ -1,16 +1,20 @@
 import discord
 import random
 import requests
-import os.path
+import os
+from dotenv import load_dotenv
 from gtts import gTTS
 import json
 import youtube_dl 
 from async_timeout import timeout
-import scr.config
 import asyncio
-
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 from discord.ext import commands
 import opuslib
+
+db = firestore.client()
 
 OPUS_LIBS = ['libopus-0.x86.dll', 'libopus-0.x64.dll', 'libopus-0.dll', 'libopus.so.0', 'libopus.0.dylib']
 
@@ -75,15 +79,122 @@ def load_opus_lib(opus_libs=OPUS_LIBS):
 def user_is_me(ctx):
     return ctx.author.id == 172475977450913792
 
+async def usageHelper(ctx,memberId,command):
+	userDoc = db.collection(u'users').document(str(memberId))
+	doc = userDoc.get()
+	if (doc.exists == False):
+		userDoc.set({u'meme':True, u'summon':True, u'stop':True, u'play':True, u'cry':True, u'invite':True, u'amicool':True, u'poll':True, u'scareme':True, u'say':True, u'noticemesenpai':True, u'clip':True, u'shaddup':True, u'swearat':True})
+		return True
+	else:
+		doc = doc.to_dict()
+		if doc[command]:
+			return True
+		else:
+			embed=discord.Embed(title="Usage", description="You've been blocked from using this command", color=0xff0000)
+			embed.set_footer(text="Rejection message sent by {0}".format(ctx.author.display_name))
+			await ctx.send(embed=embed)
+			return False
+
 def user_is_quad(ctx):
 	return ctx.author.id == 114081086065213443 or ctx.author.id == 259321897517449217 or ctx.author.id == 403355889253220352 or ctx.author.id == 172475977450913792
 
 class Bot(commands.Cog):
+
 	def __init__(self, bot):
 		self.bot = bot
 
 	@commands.command()
+	async def master(self, ctx, *args):
+		if await usageHelper(ctx, ctx.author.id,'master') == False:
+			return
+		if len(args) == 0:
+			embed=discord.Embed(title="Master Command", description="Add/Remove users to the master document", color=0x15e5cc)
+			embed.add_field(name="Add Master", value="gasp master add {user}", inline=False)
+			embed.add_field(name="Remove Master", value="gasp master remove {user}", inline=False)
+			embed.set_footer(text="Requested by {0}".format(ctx.author.display_name))
+			await ctx.send(embed=embed)
+			return
+		userId = args[1].replace('<@!','')
+		userId = userId.replace('>','')
+		member = ctx.guild.get_member(int(userId))
+		masterDoc = db.collection(u'master').document(u'master')
+		doc = masterDoc.get()
+		doc = doc.to_dict()
+		masterExists = False
+		for x in doc:
+			if x == str(ctx.author.id):
+				masterExists = True
+				break
+		if masterExists:
+			if args[0] == 'add':
+				masterDoc.set({userId:member.display_name},merge = True)
+				embed=discord.Embed(title="Master Command", description="You've succesfully added {0} to the master document".format(member.display_name), color=0x59ff00)
+				embed.set_footer(text="Requested by {0}".format(ctx.author.display_name))
+				await ctx.send(embed=embed)
+			elif args[0] == 'remove':
+				masterDoc.update({userId: firestore.DELETE_FIELD})
+				embed=discord.Embed(title="Master Command", description="You've succesfully removed {0} from the master document".format(member.display_name), color=0xff0000)
+				embed.set_footer(text="Requested by {0}".format(ctx.author.display_name))
+				await ctx.send(embed=embed)
+			else:
+				embed=discord.Embed(title="Master Command", description="Add/Remove users to the master document", color=0x15e5cc)
+				embed.add_field(name="Add Master", value="gasp master add {user}", inline=False)
+				embed.add_field(name="Remove Master", value="gasp master remove {user}", inline=False)
+				embed.set_footer(text="Requested by {0}".format(ctx.author.display_name))
+				await ctx.send(embed=embed)
+		else:
+			embed=discord.Embed(title="Master Error", description="You are not authorized to run this command", color=0x59ff00)
+			embed.set_footer(text="Requested by {0}".format(ctx.author.display_name))
+			await ctx.send(embed=embed)
+
+	@commands.command()
+	async def usage(self,ctx, member: discord.Member, *args):
+		userDoc = db.collection(u'users').document(str(member.id))
+		masterDoc = db.collection(u'master').document(u'master')
+		mDoc = masterDoc.get()
+		mDoc = mDoc.to_dict()
+		doc = userDoc.get()
+		docDict = doc.to_dict()
+		# Create document if user doesn't exist
+		if (doc.exists == False):
+			userDoc.set({u'meme':True, u'master':False, u'summon':True, u'stop':True, u'play':True, u'cry':True, u'invite':True, u'amicool':True, u'poll':True, u'scareme':True, u'say':True, u'noticemesenpai':True, u'clip':True, u'shaddup':True, u'swearat':True})
+		masterExists = False
+		for x in mDoc:
+			if x == str(ctx.author.id):
+				masterExists = True
+				break
+		if masterExists:
+			if len(docDict) != 0 and args[0] in docDict:
+				if (args[1] == 'disable'):
+					userDoc.set({args[0]:False}, merge = True)
+					embed=discord.Embed(title="Usage Command", description="You've disabled the {0} command for {1}".format(args[0], member.display_name), color=0xff0000)
+					embed.set_footer(text="Requested by {0}".format(ctx.author.display_name))
+					await ctx.send(embed=embed)
+				elif (args[1] == 'enable'):
+					userDoc.set({args[0]:True}, merge = True)
+					embed=discord.Embed(title="Usage Command", description="You've enabled the {0} command for {1}".format(args[0], member.display_name), color=0x59ff00)
+					embed.set_footer(text="Requested by {0}".format(ctx.author.display_name))
+					await ctx.send(embed=embed)
+				else:
+					embed=discord.Embed(title="Usage Command", description="Prevent specific users from using commands", color=0x1553e5)
+					embed.add_field(name="Enable usage", value="gasp usage \{user\} \{ommand\} enable", inline=False)
+					embed.add_field(name="Disable usage", value="gasp usage \{user\} \{command\} disable", inline=False)
+					embed.set_footer(text="Requested by {0}".format(ctx.author.display_name))
+					await ctx.send(embed=embed)
+			else:
+				embed=discord.Embed(title="Usage Command", description="The {} command does not exist".format(args[0]), color=0x59ff00)
+				embed.set_footer(text="Requested by {0}".format(ctx.author.display_name))
+				await ctx.send(embed=embed)
+		else:
+			embed=discord.Embed(title="Master Error", description="You are not authorized to run this command", color=0x59ff00)
+			embed.set_footer(text="Requested by {0}".format(ctx.author.display_name))
+			await ctx.send(embed=embed)
+
+	@commands.command()
 	async def meme(self,ctx,*args):
+		if await usageHelper(ctx, ctx.author.id,'meme') == False:
+			return
+
 		response = requests.get("https://api.imgflip.com/get_memes")
 		memetemplates = ["","","","","",""]
 		memedic = {}  #{num: (id,boxcount)}
@@ -171,16 +282,22 @@ class Bot(commands.Cog):
 
 	@commands.command()
 	async def summon(self, ctx):
+		if await usageHelper(ctx, ctx.author.id,'summon') == False:
+			return
 		channel = ctx.author.voice.channel
 		channel = await channel.connect()
 
 	@commands.command()
 	async def stop(self, ctx):
+		if await usageHelper(ctx, ctx.author.id,'stop') == False:
+			return
 		server = ctx.message.guild.voice_client
 		await server.disconnect()
 
 	@commands.command(pass_context=True)
 	async def play(self, ctx, *, url):
+		if await usageHelper(ctx, ctx.author.id,'play') == False:
+			return
 		channel = ctx.author.voice.channel
 		channel = await channel.connect()
 		async with ctx.typing():
@@ -191,16 +308,22 @@ class Bot(commands.Cog):
 
 	@commands.command(name='cry')
 	async def cry(self, ctx):
-	    r = requests.get('https://source.unsplash.com/collection/1775931')
-	    await ctx.send(r.url)
+		if await usageHelper(ctx, ctx.author.id,'cry') == False:
+			return
+		r = requests.get('https://source.unsplash.com/collection/1775931')
+		await ctx.send(r.url)
 
 	@commands.command()
 	async def invite(self, ctx):
+		if await usageHelper(ctx, ctx.author.id,'meme') == False:
+			return
 		await ctx.author.send("Your mistake...")
 		await ctx.author.send('https://discord.com/api/oauth2/authorize?client_id=770766611929366551&permissions=0&scope=bot')
 
 	@commands.command(name='amicool')
 	async def amicool(self, ctx):
+		if await usageHelper(ctx, ctx.author.id,'amicool') == False:
+			return
 		if user_is_me(ctx):
 			await ctx.send(file = discord.File("res/wavy_bro.jpg"))
 			await ctx.send('ngl, your pretty wavy bro')
@@ -214,6 +337,8 @@ class Bot(commands.Cog):
 	
 	@commands.command()
 	async def poll(self, ctx, *args):
+		if await usageHelper(ctx, ctx.author.id,'poll') == False:
+			return
 		if len(args) == 0:
 			embed=discord.Embed(title="Poll Usage", description="Creates a poll using reactions as poll data", color=0xce1adb)
 			embed.set_thumbnail(url="https://media.giphy.com/media/KzPQHtlTajSTVPRcCz/giphy.gif")
@@ -238,10 +363,13 @@ class Bot(commands.Cog):
 
 	@commands.command()
 	async def scareme(self,ctx):
+		if await usageHelper(ctx, ctx.author.id,'scareme') == False:
+			return
 		await ctx.message.delete()
 		timeFrame = random.randint(20, 600)
-		channel = ctx.author.voice.channel
-		channel = await channel.connect()
+		if ctx.author.voice.channel == None:
+			channel = ctx.author.voice.channel
+			channel = await channel.connect()
 		await asyncio.sleep(timeFrame)
 		guild = ctx.guild 
 		voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=guild)
@@ -254,7 +382,8 @@ class Bot(commands.Cog):
 
 	@commands.command()
 	async def say(self, ctx, *args):
-
+		if await usageHelper(ctx, ctx.author.id,'say') == False:
+			return
 		# If the user provides a language
 		if len(args) > 1:
 			tts = gTTS(args[0], lang=args[1])
@@ -301,7 +430,8 @@ class Bot(commands.Cog):
 	@commands.command()
 	@commands.cooldown(1, 30, commands.BucketType.user)
 	async def noticemesenpai(self, ctx, member: discord.Member, *args):
-
+		if await usageHelper(ctx, ctx.author.id,'noticemesenpai') == False:
+			return
 		name = ctx.author.display_name
 		if int(args[0]) > 10:
 			await ctx.send("Can't be spamming them so much")
@@ -321,6 +451,8 @@ class Bot(commands.Cog):
 
 	@commands.command()
 	async def clip(self, ctx, *args):
+		if await usageHelper(ctx, ctx.author.id,'clip') == False:
+			return
 		if user_is_quad(ctx):
 			if len(args) == 0:
 				embed=discord.Embed(title="will play a sus clip.", description="Usage: gasp clip {clip-name}", color=0x1100ff)
@@ -351,6 +483,8 @@ class Bot(commands.Cog):
 
 	@commands.command()
 	async def shaddup(self, ctx, member: discord.Member):
+		if await usageHelper(ctx, ctx.author.id,'shaddup') == False:
+			return
 		if user_is_me(ctx) or ctx.author.guild_permissions.administrator:
 			await member.edit(mute=True)
 			await member.edit(deafen=True)
@@ -370,52 +504,54 @@ class Bot(commands.Cog):
 
 	@commands.command()
 	async def swearat(self, ctx, name:str='', num_times:str=''):
-	    all_words = open("res/swearwords.txt").readlines()
-	    selected_words = all_words[random.randrange(165)][:-1]
-	    
-	    # see if "twice" or "thrice" is written in the command
-	    if 'twice' in num_times:
-	        selected_words += ' ' + all_words[random.randrange(165)][:-1]
-	    elif 'thrice' in num_times:
-	        selected_words += ' ' + all_words[random.randrange(165)][:-1] \
-	                        + ' ' + all_words[random.randrange(165)][:-1]
-	    elif 'random' in num_times:
-	        for i in range(random.randint(1, 10)):
-	            selected_words += ' ' + all_words[random.randrange(165)][:-1]
-	    
-	    elif num_times.isdigit():
-	        if int(num_times) > 1000: num_times = 1000
+		if await usageHelper(ctx, ctx.author.id,'swearat') == False:
+			return
+		all_words = open("res/swearwords.txt").readlines()
+		selected_words = all_words[random.randrange(165)][:-1]
 
-	        for i in range(int(num_times)):
-	            selected_words += ' ' + all_words[random.randrange(165)][:-1]
+		# see if "twice" or "thrice" is written in the command
+		if 'twice' in num_times:
+		    selected_words += ' ' + all_words[random.randrange(165)][:-1]
+		elif 'thrice' in num_times:
+		    selected_words += ' ' + all_words[random.randrange(165)][:-1] \
+		                    + ' ' + all_words[random.randrange(165)][:-1]
+		elif 'random' in num_times:
+		    for i in range(random.randint(1, 10)):
+		        selected_words += ' ' + all_words[random.randrange(165)][:-1]
 
-	    if name == '':
-	        name = random.choice(ctx.guild.members).mention
-	    elif not name.startswith('<@'):
-	        try:
-	            name = ctx.guild.get_member_named(name).mention
-	        except:
-	            name = ctx.author.mention
+		elif num_times.isdigit():
+		    if int(num_times) > 1000: num_times = 1000
 
-	    # check for long messages
-	    if len(name + ' is a ' + selected_words) <= 2000:
-	        await ctx.send(name + ' is a ' + selected_words, delete_after=30)
-	    else:
-	        curr_msg = name + ' is a' # build up message up to 2000 characters
+		    for i in range(int(num_times)):
+		        selected_words += ' ' + all_words[random.randrange(165)][:-1]
 
-	        for word in selected_words.split():
-	            if len(curr_msg + ' ' + word) <= 2000:
-	                curr_msg += ' ' + word
-	            else:  # we've reached the limit
-	                await ctx.send(curr_msg, delete_after=30)
-	                curr_msg = name + ' is a ' + word  # start it over again
+		if name == '':
+		    name = random.choice(ctx.guild.members).mention
+		elif not name.startswith('<@'):
+		    try:
+		        name = ctx.guild.get_member_named(name).mention
+		    except:
+		        name = ctx.author.mention
 
-	        # send anything left over
-	        if len('and finally ' + curr_msg) <= 2000: await ctx.send('and finally ' + curr_msg, delete_after=30)
-	        else:
-	            second_last_msg, last_word = curr_msg.rsplit(' ', 1)
-	            await ctx.send(second_last_msg, delete_after=30)
-	            await ctx.send('and finally ' + name + ' is a ' + last_word, delete_after=30)
+		# check for long messages
+		if len(name + ' is a ' + selected_words) <= 2000:
+		    await ctx.send(name + ' is a ' + selected_words, delete_after=30)
+		else:
+		    curr_msg = name + ' is a' # build up message up to 2000 characters
+
+		    for word in selected_words.split():
+		        if len(curr_msg + ' ' + word) <= 2000:
+		            curr_msg += ' ' + word
+		        else:  # we've reached the limit
+		            await ctx.send(curr_msg, delete_after=30)
+		            curr_msg = name + ' is a ' + word  # start it over again
+
+		    # send anything left over
+		    if len('and finally ' + curr_msg) <= 2000: await ctx.send('and finally ' + curr_msg, delete_after=30)
+		    else:
+		        second_last_msg, last_word = curr_msg.rsplit(' ', 1)
+		        await ctx.send(second_last_msg, delete_after=30)
+		        await ctx.send('and finally ' + name + ' is a ' + last_word, delete_after=30)
 
 def setup(bot):
     bot.add_cog(Bot(bot))
