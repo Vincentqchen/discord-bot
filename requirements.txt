@@ -5,10 +5,8 @@ requests
 python-dotenv
 gTTS
 opuslib
-asyncio
 youtube-dl
-discord
-discord.py[voice] ~= 1.4.0
+discord.py[voice]
 pip
 ffmpeg
 google-cloud-firestore
