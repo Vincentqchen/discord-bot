@@ -14,6 +14,6 @@ from firebase_admin import firestore
 from discord.ext import commands
 import opuslib
 
-async def cryCommand(ctx,bot):
-	r = requests.get('https://source.unsplash.com/collection/1775931')
-	await ctx.send(r.url)
+async def inviteCommand(ctx):
+	await ctx.author.send("Your mistake...")
+	await ctx.author.send('https://discord.com/api/oauth2/authorize?client_id=770766611929366551&permissions=0&scope=bot')
