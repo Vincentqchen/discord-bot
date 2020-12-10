@@ -1,4 +1,4 @@
-# KenB
+# KenBot
 
 [Click here to invite](https://discord.com/api/oauth2/authorize?client_id=770766611929366551&permissions=8&scope=bot) ken bot to your server!
 
