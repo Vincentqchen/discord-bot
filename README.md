@@ -13,6 +13,10 @@
 | `gasp stop` | Kicks the bot from a channel |  |
 | `gasp summon` | Summons the bot to a channel |  |
 | `gasp amicool` | Simple.. lets you know if you a kool kid |  |
-| `gasp poll` | Creates an interactive poll | Do gasp poll for help |
+| `gasp poll` | Creates an interactive poll | Do 'gasp poll' for help |
+| `gasp shaddup` | Server mute and deafen members |  |
+| `gasp swearat` | Provides a nice provacative message towards a user |  |
+| `gasp say` | Will transform a text message into speech. The bot will join the channel your in and play the message | Do 'gasp say help' for help |
+| `gasp scareme` | The bot will join the channel and play a scream at a random time | Will delete the message after sending |
 
-Work in progess...
+
